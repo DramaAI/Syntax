@@ -6,12 +6,30 @@ from pathlib import Path
 import os
 import getpass
 
-env_file = "syntax"
+
+# Configuration
+env_file = "syntax"  # Name of the virtual environment or directory
 requirement_file = Path(__file__).parent.parent.absolute().joinpath('requirements.txt').__str__()
-cmd = None
+# Path to the requirements.txt file
 
+cmd = None  # Placeholder for command input
 
-def create_and_install_environment(env_type : Literal["conda"] | Literal["local"]):
+# TODO: 
+# Remove environment - rm -r ./syntax
+def pip_available(path : str) -> str | None:
+
+    for pip_version in ['pip', 'pip3']:
+        try:
+            pip_path : str = os.path.join(path, "bin", pip_version) 
+            subprocess.run([pip_path, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            print(f"- {pip_available} Installed...")
+            return pip_path
+        except (subprocess.CalledProcessError, FileNotFoundError):
+                print(f"- {pip_available} Not-Installed...")
+                continue
+    return None
+
+def create_environment(env_type : Literal["conda"] | Literal["local"]):
     try:
         path = Path(__file__).parent.parent.absolute().joinpath(env_file)
         if env_type == "local":   
@@ -23,7 +41,6 @@ def create_and_install_environment(env_type : Literal["conda"] | Literal["local"
                 activate_script = os.path.join(env_file, "Scripts", "activate")
             else:
                 activate_script = os.path.join(path, "bin", "activate")
-            print(activate_script)
             subprocess.run(["source", activate_script], shell=True)
 
             while cmd :=input("[y/n]").lower() :
@@ -32,7 +49,14 @@ def create_and_install_environment(env_type : Literal["conda"] | Literal["local"
 
             # Step 3: Install requirements using pip
             if cmd == 'y':
-                subprocess.run([os.path.join(path, "bin", "pip"), "install", "-r", requirement_file])
+                pip = pip_available(path) 
+
+                if pip != None:
+                    print(pip)
+                    subprocess.run([pip, "install", "-r", requirement_file])
+   
+                else:
+                    print("need to install pip module...")
 
             # Step 4: Deactivate the virtual environment
             subprocess.run(["deactivate"], shell=True)
@@ -42,16 +66,22 @@ def create_and_install_environment(env_type : Literal["conda"] | Literal["local"
     except subprocess.CalledProcessError:
         print("An error occurred while creating the environment or installing requirements.")
 
+# TODO: When migrating to docker implement this functions
+# def docker_manager():
+#     print(f"'sorry I can do that {getpass.getuser()}...' - HAL-9000")
+
+
+# TODO: build unit tester function that preforms a set 
+#       of unit test within the backend
+def unit_tester():
+    print(f"'sorry I can do that {getpass.getuser()}...' - HAL-9000")
+
 # TODO: 
 #   - Build Unit testing module
 #   - Build Docker when we build the backend api
-OPTIONS = {'rm': ["echo", f"'sorry I can do that {getpass.getuser()}...' - HAL-9000"],  
-           'b' : ["echo", f"'sorry I can do that {getpass.getuser()}...' - HAL-9000"], 
-           'r' : ["echo", f"'sorry I can do that {getpass.getuser()}...' - HAL-9000"], 
-           'e' : ["echo", f"'sorry I can do that {getpass.getuser()}...' - HAL-9000"], 
-           'l' : create_and_install_environment,
-           'a' : create_and_install_environment,
-           'u' : ["echo", f"'sorry I can do that {getpass.getuser()}...' - HAL-9000"], }
+OPTIONS = {'l' : 'create_environment',
+           'a' : 'create_environment',
+           'u' : 'unit_tester', }
 
 def function_commands(cmd: str):
     """
@@ -69,24 +99,20 @@ def function_commands(cmd: str):
         subprocess.CalledProcessError: If the command execution fails.
     """
     try:
+        fn = getattr(sys.modules[__name__], OPTIONS[cmd])
         if cmd in ["l", 'a']:
-            OPTIONS[cmd]('local' if cmd == 'l' else 'conda')
+            fn('local' if cmd == 'l' else 'conda')
         else:
-            result = subprocess.run(OPTIONS[cmd], text=True, capture_output=True, check=True)
-            print(result.stdout)
+            fn()
     except subprocess.CalledProcessError as e:
         print(f"Error executing the command: {e}")
 
 def menu():
     print(f"What would you like to do?\n\
-          \r\t-{'(rm)':^6}Remove Container\n\
-          \r\t-{'(b)':^6}Build Container\n\
-          \r\t-{'(r)':^6}Running Container\n\
-          \r\t-{'(e)':^6}Enter Container\n\
-          \r\t-{'(l)':^6}Local Build\n\
-          \r\t-{'(a)':^6}Anaconda Build\n\
-          \r\t-{'(u)':^6}Unit Testing\n\
-          \r\t-{'(q)':^6}Quit Program\n")    
+\t-{'(l)':^6}Local Build\n\
+\t-{'(a)':^6}Anaconda Build\n\
+\t-{'(u)':^6}Unit Testing\n\
+\t-{'(q)':^6}Quit Program\n")    
 
 if __name__ == "__main__":
     menu()

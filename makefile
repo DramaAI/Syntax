@@ -1,11 +1,11 @@
 build:
-	bash ./bash/build.sh -$(FLAG)
+	bash ./bash/build.sh $(FLAG)
 
 help:
-	@make build FLAG=h
+	@make build FLAG=-h
 
-conda_env:
-	conda activate syntax
+requirement:
+	@make build FLAG=-r
 
-conda_env_install:
-	pip3 install -r requirements.txt
+rm-syntax:
+	@rm -r ./syntax
