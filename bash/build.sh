@@ -1,11 +1,13 @@
+#!/bin/bash
+
 DIR="$(cd "$(dirname "$0")" && pwd)"
 CUDA_DEVICE_AVAILABLE=false
 CUDA_DEVICES=0
 REQUIREMENTS_FLAG=false
 PYTHON3=false
 PYTHON=false
-DOCKER=false 
-
+PYTHON_VERSION="null"
+DOCKER=false
 
 usage() {
     echo "Usage: $0 [-c <number of devices>] [-r] [-h]"
@@ -27,43 +29,42 @@ help() {
     exit 0
 }
 
-
 # Parse command-line options
 while getopts "c:rh" opt; do
     case "$opt" in
-        n) CUDA_DEVICES="$OPTARG" ;;
+        c) CUDA_DEVICES="$OPTARG" ;;
         r) REQUIREMENTS_FLAG=true ;;
         h) help ;;
         ?) usage ;;
     esac
 done
 
-
 # |====================================================|
-# | Requirments ****************************************|
+# | Requirements ****************************************|
 # |====================================================|
 if [ "$REQUIREMENTS_FLAG" = true ]; then
-    echo "\nRequirement(s)
-        \r---------------------------------"
+    echo -e "\nRequirements"
+    echo "---------------------------------"
 
-    # Check if Docker exsit
+    # Check if Docker exists
     if docker --version >/dev/null 2>&1 && docker-compose --version >/dev/null 2>&1; then
-    echo "- Docker  installed... ✅" 
+        echo "- Docker installed... ✅"
     else
-    echo "- Docker  Not-Install.. ❌"
+        echo "- Docker Not Installed... ❌"
     fi
 
     # Check if Python (python) is installed and get version
     if command -v python &>/dev/null; then
         PYTHON=true
+        PYTHON_VERSION=$(python -V 2>&1 | cut -d " " -f2)
         echo "- python installed...  ✅"
     fi
 
     # Check if Python 3 (python3) is installed and get version
     if command -v python3 &>/dev/null; then
         PYTHON3=true
+        PYTHON_VERSION=$(python3 -V 2>&1 | cut -d " " -f2)
         echo "- python3 installed... ✅"
-        
     else
         echo "- python3 is not installed... ❌"
         exit 0
@@ -73,18 +74,19 @@ if [ "$REQUIREMENTS_FLAG" = true ]; then
 else
     if command -v python &>/dev/null; then
         PYTHON=true
+        PYTHON_VERSION=$(python -V 2>&1 | cut -d " " -f2)
     fi
 
     # Check if Python 3 (python3) is installed and get version
     if command -v python3 &>/dev/null; then
         PYTHON3=true
+        PYTHON_VERSION=$(python3 -V 2>&1 | cut -d " " -f2)
     else
         echo "=== End Program ==="
         exit 0
     fi
-
+    echo "python$PYTHON_VERSION"
 fi
-
 
 # |====================================================|
 # | Begin Of Program **********************************|
@@ -109,9 +111,8 @@ fi
 if [ $PYTHON3 = true ]; then
     python3 "$DIR/cli.py"
 else
-    echo -e "\n=== End Program ==="
     exit 0
 fi
 
-
-echo "\n\r===End Program==="
+echo "=== End Program ==="
+exit 0

@@ -1,36 +1,44 @@
+from __future__ import annotations
 import sys
 import subprocess
+from typing import Literal
 from pathlib import Path
 import os
 import getpass
 
-__dir__ = Path(__file__).parent.parent.absolute().joinpath('requirements.txt')
+env_file = "syntax"
+requirement_file = Path(__file__).parent.parent.absolute().joinpath('requirements.txt').__str__()
 cmd = None
 
 
-
-
-def create_and_install_environment():
+def create_and_install_environment(env_type : Literal["conda"] | Literal["local"]):
     try:
-        path = Path(__file__).parent.parent.absolute().joinpath("syntax")
-        print(path)
-        # Step 1: Create a virtual environment
-        subprocess.check_call([sys.executable, "-m", "venv", "syntax"])
+        path = Path(__file__).parent.parent.absolute().joinpath(env_file)
+        if env_type == "local":   
+            # Step 1: Create a virtual environment
+            subprocess.check_call([sys.executable, "-m", "venv", "syntax"])
 
-        # Step 2: Activate the virtual environment
-        if sys.platform == "win32":
-            activate_script = os.path.join("syntax", "Scripts", "activate")
+            # Step 2: Activate the virtual environment
+            if sys.platform == "win32":
+                activate_script = os.path.join(env_file, "Scripts", "activate")
+            else:
+                activate_script = os.path.join(path, "bin", "activate")
+            print(activate_script)
+            subprocess.run(["source", activate_script], shell=True)
+
+            while cmd :=input("[y/n]").lower() :
+                if cmd in ['y', 'n']:
+                    break
+
+            # Step 3: Install requirements using pip
+            if cmd == 'y':
+                subprocess.run([os.path.join(path, "bin", "pip"), "install", "-r", requirement_file])
+
+            # Step 4: Deactivate the virtual environment
+            subprocess.run(["deactivate"], shell=True)
         else:
-            activate_script = os.path.join(path, "bin", "activate")
-        print(activate_script)
-        subprocess.run(["source", activate_script], shell=True)
+            subprocess.run(['conda', 'create', '--name', env_file])
 
-        # Step 3: Install requirements using pip
-        subprocess.run([os.path.join(path, "bin", "pip"), "install", "-r", __dir__])
-
-        # Step 4: Deactivate the virtual environment
-        subprocess.run(["deactivate"], shell=True)
-        print("Local environment created and requirements have been successfully installed.")
     except subprocess.CalledProcessError:
         print("An error occurred while creating the environment or installing requirements.")
 
@@ -42,7 +50,7 @@ OPTIONS = {'rm': ["echo", f"'sorry I can do that {getpass.getuser()}...' - HAL-9
            'r' : ["echo", f"'sorry I can do that {getpass.getuser()}...' - HAL-9000"], 
            'e' : ["echo", f"'sorry I can do that {getpass.getuser()}...' - HAL-9000"], 
            'l' : create_and_install_environment,
-           'a' : ["conda", "create", "--name", "syntax", "--file", __dir__, "-y"],
+           'a' : create_and_install_environment,
            'u' : ["echo", f"'sorry I can do that {getpass.getuser()}...' - HAL-9000"], }
 
 def function_commands(cmd: str):
@@ -61,16 +69,16 @@ def function_commands(cmd: str):
         subprocess.CalledProcessError: If the command execution fails.
     """
     try:
-        if cmd == "l":
-            OPTIONS[cmd]()
+        if cmd in ["l", 'a']:
+            OPTIONS[cmd]('local' if cmd == 'l' else 'conda')
         else:
-            result = subprocess.run(OPTIONS[cmd], text=True, capture_output=True, check=True)
+            print(OPTIONS[cmd])
+            result = subprocess.run(OPTIONS[cmd], text=True, capture_output=True, check=True, shell=True)
             print(result.stdout)
     except subprocess.CalledProcessError as e:
         print(f"Error executing the command: {e}")
-    
 
-if __name__ == "__main__":
+def menu():
     print(f"What would you like to do?\n\
           \r\t-{'(rm)':^6}Remove Container\n\
           \r\t-{'(b)':^6}Build Container\n\
@@ -79,15 +87,18 @@ if __name__ == "__main__":
           \r\t-{'(l)':^6}Local Build\n\
           \r\t-{'(a)':^6}Anaconda Build\n\
           \r\t-{'(u)':^6}Unit Testing\n\
-          \r\t-{'(q)':^6}Quit Program\n")
+          \r\t-{'(q)':^6}Quit Program\n")    
+
+if __name__ == "__main__":
+    menu()
     try:
-        cmd = input("Enter command: ")
+        cmd = input("Enter command: ").lower()
         while not cmd in list(OPTIONS.keys()):
-            if cmd.lower() == "q":
+            if cmd == "q":
                 sys.exit()
             print("\nSorry that command does not exist... try one of the command that do exist\n")
-            cmd = input("Enter command: ")
+            cmd = input("Enter command: ").lower()
     except KeyboardInterrupt as key:
         sys.exit()
         
-    function_commands(cmd.lower())
+    function_commands(cmd)
