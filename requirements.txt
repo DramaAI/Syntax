@@ -1,0 +1,8 @@
+torch
+wandb
+fastapi
+ray
+gradio
+streamlit
+transformers
+openai
