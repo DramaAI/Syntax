@@ -55,22 +55,18 @@ if [ "$REQUIREMENTS_FLAG" = true ]; then
 
     # Check if Python (python) is installed and get version
     if command -v python &>/dev/null; then
-        PYTHON=true
-        PYTHON_VERSION=$(python -V 2>&1 | cut -d " " -f2)
         echo "- python installed...  ✅"
     fi
 
     # Check if Python 3 (python3) is installed and get version
     if command -v python3 &>/dev/null; then
-        PYTHON3=true
-        PYTHON_VERSION=$(python3 -V 2>&1 | cut -d " " -f2)
         echo "- python3 installed... ✅"
     else
         echo "- python3 is not installed... ❌"
         exit 0
     fi
-
     echo "---------------------------------"
+    exit 0
 else
     if command -v python &>/dev/null; then
         PYTHON=true
@@ -85,7 +81,6 @@ else
         echo "=== End Program ==="
         exit 0
     fi
-    echo "python$PYTHON_VERSION"
 fi
 
 # |====================================================|
@@ -115,4 +110,3 @@ else
 fi
 
 echo "=== End Program ==="
-exit 0

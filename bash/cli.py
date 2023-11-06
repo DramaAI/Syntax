@@ -72,8 +72,7 @@ def function_commands(cmd: str):
         if cmd in ["l", 'a']:
             OPTIONS[cmd]('local' if cmd == 'l' else 'conda')
         else:
-            print(OPTIONS[cmd])
-            result = subprocess.run(OPTIONS[cmd], text=True, capture_output=True, check=True, shell=True)
+            result = subprocess.run(OPTIONS[cmd], text=True, capture_output=True, check=True)
             print(result.stdout)
     except subprocess.CalledProcessError as e:
         print(f"Error executing the command: {e}")
