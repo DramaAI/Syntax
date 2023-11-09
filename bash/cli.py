@@ -9,7 +9,8 @@ import getpass
 
 # Configuration
 env_file = "syntax"  # Name of the virtual environment or directory
-requirement_file = Path(__file__).parent.parent.absolute().joinpath('requirements.txt').__str__()
+repo = Path(__file__).parent.parent.absolute()
+requirement_file = repo.joinpath('requirements.txt').__str__()
 # Path to the requirements.txt file
 
 cmd = None  # Placeholder for command input
@@ -31,7 +32,7 @@ def pip_available(path : str) -> str | None:
 
 def create_environment(env_type : Literal["conda"] | Literal["local"]):
     try:
-        path = Path(__file__).parent.parent.absolute().joinpath(env_file)
+        path = repo.joinpath(env_file)
         if env_type == "local":   
             # Step 1: Create a virtual environment
             subprocess.check_call([sys.executable, "-m", "venv", "syntax"])
@@ -71,10 +72,11 @@ def create_environment(env_type : Literal["conda"] | Literal["local"]):
 #     print(f"'sorry I can do that {getpass.getuser()}...' - HAL-9000")
 
 
-# TODO: build unit tester function that preforms a set 
-#       of unit test within the backend
 def unit_tester():
-    print(f"'sorry I can do that {getpass.getuser()}...' - HAL-9000")
+    try:
+        subprocess.run([sys.executable, os.path.join(repo, 'test', 'main.py')])
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("An error occurred while running a unit tests.")
 
 # TODO: 
 #   - Build Unit testing module
