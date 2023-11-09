@@ -226,7 +226,6 @@ class SyntaxGPT(nn.Module):
         ))
 
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
-        self.apply(self._xavier_initialization)
 
     
     def _xavier_initialization(self, module):
