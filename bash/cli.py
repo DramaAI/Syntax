@@ -15,10 +15,26 @@ requirement_file = repo.joinpath('requirements.txt').__str__()
 
 cmd = None  # Placeholder for command input
 
-# TODO: 
-# Remove environment - rm -r ./syntax
 def pip_available(path : str) -> str | None:
+    """
+    Check if pip is available in the specified path.
 
+    This function attempts to locate and verify the presence of pip (or pip3) in the given path. If found, it returns the
+    full path to the pip executable; otherwise, it returns None.
+
+    Args:
+        path (str): The directory path to check for pip.
+
+    Returns:
+        str | None: The full path to the pip executable if found, or None if pip is not available in the path.
+
+    Example:
+        pip_path = pip_available('/path/to/python/')
+        if pip_path:
+            print(f'Found pip at {pip_path}')
+        else:
+            print('pip is not available in the specified path.')
+    """
     for pip_version in ['pip', 'pip3']:
         try:
             pip_path : str = os.path.join(path, "bin", pip_version) 
@@ -31,6 +47,18 @@ def pip_available(path : str) -> str | None:
     return None
 
 def create_environment(env_type : Literal["conda"] | Literal["local"]):
+    """
+    Create a virtual environment and install requirements.
+
+    This function creates a virtual environment, activates it, installs requirements using pip (if requested),
+    and deactivates the environment.
+
+    Args:
+        env_type (Literal["conda"] | Literal["local"]): The type of environment to create (either "conda" or "local").
+
+    Example:
+        create_environment("local")  # Create a local virtual environment and install requirements.
+    """
     try:
         path = repo.joinpath(env_file)
         if env_type == "local":   
@@ -73,6 +101,19 @@ def create_environment(env_type : Literal["conda"] | Literal["local"]):
 
 
 def unit_tester():
+    """
+        Execute a python main.py within the test directory to run all the unit tests
+
+        Parameter:
+            None
+        
+        Return :
+            None
+        
+        Raises:
+            subprocess.CalledProcessError: If the command execution fails.
+            FileNotFoundError: If the file is not found.
+    """
     try:
         subprocess.run([sys.executable, os.path.join(repo, 'test', 'main.py')])
     except (subprocess.CalledProcessError, FileNotFoundError):
@@ -123,7 +164,7 @@ if __name__ == "__main__":
         while not cmd in list(OPTIONS.keys()):
             if cmd == "q":
                 sys.exit()
-            print("\nSorry that command does not exist... try one of the command that do exist\n")
+            print(f"\nSorry {getpass.getuser()} that command does not exist... try one of the command that do exist\n")
             cmd = input("Enter command: ").lower()
     except KeyboardInterrupt as key:
         sys.exit()
