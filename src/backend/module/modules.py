@@ -55,11 +55,12 @@ class attn_module(nn.Module):
             input (torch tensor): Input tensor of shape (num_tokens, num_features) 
 
         Returns:
-            reaplce_probs (torch tensor): Torch tensor of shape (num_tokens, 1) containing the probability of replacing each token with a synonym.
-            synonym_probs (torch tensor): Torch tensor of shape (dict_size, num_tokens) containing the softmax probability of replacing each token with another token
-                                          depends on config.synonym_head which has options "linear" and "softmax". If "softmax" then probabilities are returned,
-                                          if "linear" then softmax is not applied which is useful for using a loss such as torch.nn.CrossEntropyLoss() as it 
-                                          applies softmax internally.
+            reaplce_probs (torch tensor): Tensor of shape (num_tokens, 1) containing the probability of replacing each token with a synonym. Depends on
+                                            config.replace_head which has options "linear" and "sigmoid". If "sigmoid" then probabilities are returned,
+                                            if "linear" then sigmoid is not applied which is useful for the torch.nn.BCELoss() as it applies sigmoid internally.
+            synonym_probs (torch tensor): Tensor of shape (num_tokens, dict_size) containing the softmax probability of replacing each token with another token.
+                                          Depends on config.synonym_head which has options "linear" and "softmax". If "softmax" then probabilities are returned,
+                                          if "linear" then softmax is not applied which is useful for the torch.nn.CrossEntropyLoss() as it applies softmax internally.
         """
         
         # Queries, Values, and Keys
@@ -71,7 +72,7 @@ class attn_module(nn.Module):
         # Attention 2.
         attn_out2, _ = self.attn2(query2, key2, value2, need_weights=False)
         
-        # Project attention output to correct dimension
+        # Project attention output 2 to correct dimension 
         attn_out2_proj1 = self.proj1(attn_out2)
         
         # Replacement probabilities
@@ -92,8 +93,6 @@ class attn_module(nn.Module):
             synonym_probs = F.softmax(attn_out2_proj3, dim=0)
         
         return replace_probs, synonym_probs
-
-
 
 
 
