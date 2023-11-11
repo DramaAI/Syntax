@@ -72,19 +72,20 @@ class attn_module(nn.Module):
         # Attention 2.
         attn_out2, _ = self.attn2(query2, key2, value2, need_weights=False)
         
-        # Project attention output 2 to correct dimension 
+        # Project: (num_tokens, embed_dim[1]) -> (num_tokens, embed_dim[0])
         attn_out2_proj1 = self.proj1(attn_out2)
         
         # Replacement probabilities
-        # Sum attention outputs project to 1 dimension
+        # Sum and project: (num_tokens, embed_dim[0]) -> (num_tokens, 1)
         replace_probs = self.proj2(attn_out1 + attn_out2_proj1)
         if config.replace_head == "linear":
             replace_probs = replace_probs
         elif config.replace_head == "sigmoid":
             replace_probs = F.sigmoid(replace_probs)
         
+
         # Synonym probabilities
-        # Project attention outputs to dictionary dimension
+        # Project: (num_tokens, embed_dim[1]) -> (num_tokens, dict_size)
         attn_out2_proj3 = self.proj3(attn_out2)
         
         if config.synonym_head == "linear":
