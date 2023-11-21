@@ -12,6 +12,6 @@ if __name__ == "__main__":
 
     suit.addTest(loader.loadTestsFromTestCase(TestLossModules))
     suit.addTest(loader.loadTestsFromTestCase(TestGPTModules))
-
+    print(f"\nUnit Test 🧪\n{'':-^70}")
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suit)
