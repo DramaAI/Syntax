@@ -67,7 +67,7 @@ class CrossEntropy(nn.Module):
         Returns:
         torch.Tensor: Categorical cross-entropy loss
         """
-        return self.ce(pred, target)  # Computes categorical cross-entropy loss
+        return self.ce(pred, target, reduction="mean")  # Computes categorical cross-entropy loss
 
 
 class JointCrossEntropy(nn.Module):
