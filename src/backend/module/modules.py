@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from pydantic import BaseModel
+import unittest
 
 class attn_config(BaseModel):
     """
@@ -67,6 +68,9 @@ class attn_module(nn.Module):
                                            dropout=config.dropout[0], batch_first=True)
         self.attn2 = nn.MultiheadAttention(config.embed_dim[1], config.num_heads[1], 
                                            dropout=config.dropout[1], batch_first=True)
+        
+        self.synonym_head = config.synonym_head
+        self.replace_head = config.replace_head
 
     def forward(self, input):
         """
@@ -99,45 +103,49 @@ class attn_module(nn.Module):
         
         # Compute replacement probabilities
         replace_probs = self.proj2(attn_out1 + attn_out2_proj1)
-        if config.replace_head == "sigmoid":
+        if self.replace_head == "sigmoid":
             replace_probs = torch.sigmoid(replace_probs)
-        elif config.replace_head == "linear":
+        elif self.replace_head == "linear":
             pass
     
         # Compute synonym probabilities
         synonym_probs = self.proj3(attn_out2)
-        if config.synonym_head == "softmax":
+        if self.synonym_head == "softmax":
             synonym_probs = F.softmax(synonym_probs, dim=-1)
-        elif config.synonym_head == "linear":
+        elif self.synonym_head == "linear":
             pass
         
         return replace_probs, synonym_probs
 
 
 
-# Test
-config = attn_config(embed_dim=[512, 512], num_heads=[2, 2], dropout=[0.0, 0.0], 
-                     input_dim=256, dict_dim=3, synonym_head="softmax", replace_head="sigmoid")
+if __name__ == '__main__':
 
-# Input must now be of shape (batch_size, num_tokens, num_features)
-# Let's assume a batch_size of 10 for this example
-batch_size = 2
-num_tokens = 3
-input_features = 256
+    # Unit tests
+    config = attn_config(embed_dim=[512, 512], num_heads=[2, 2], dropout=[0.0, 0.0], 
+                        input_dim=256, dict_dim=3, synonym_head="softmax", replace_head="sigmoid")
 
-# Generating random input to simulate a batch of sequences
-input = torch.randn(batch_size, num_tokens, input_features)
+    # Input must now be of shape (batch_size, num_tokens, num_features)
+    # Let's assume a batch_size of 10 for this example
+    batch_size = 2
+    num_tokens = 3
+    input_features = 256
 
-# Instantiate the attention module with the given configuration
-attn_mech = attn_module(config)
+    # Generating random input to simulate a batch of sequences
+    input = torch.randn(batch_size, num_tokens, input_features)
 
-# Forward pass through the attention mechanism
-# Note that config is no longer passed as an argument to the forward method
-replace_probs, synonym_probs = attn_mech(input)
+    # Instantiate the attention module with the given configuration
+    attn_mech = attn_module(config)
 
-# Print out shapes and values
-print(f"Replacement Probabilities Shape: {replace_probs.shape}")  # Expected: (batch_size, num_tokens, 1)
-print(f"Synonym Probabilities Shape: {synonym_probs.shape}")      # Expected: (batch_size, num_tokens, dict_dim)
-print(f"Replacement Probabilities: {replace_probs[1]}")           # Expected: A vector of probabilities for each token. There are three words, so three probabilities.
-print(f"Replacement Probabilities: {replace_probs[0][0]}")        # Expected: Value between 0 and 1
-print(f"Synonym Probabilities: {torch.sum(synonym_probs[0][0])}") # Expected : Sum to 1 constraint for the softmax probabilities, for the first token
+    # Forward pass through the attention mechanism
+    # Note that config is no longer passed as an argument to the forward method
+    replace_probs, synonym_probs = attn_mech(input)
+
+    # Print out shapes and values
+    print(f"Replacement Probabilities Shape: {replace_probs.shape}")  # Expected: (batch_size, num_tokens, 1)
+    print(f"Synonym Probabilities Shape: {synonym_probs.shape}")      # Expected: (batch_size, num_tokens, dict_dim)
+    print(f"Replacement probabilities for each token in Batch 2: {replace_probs[1]}")           # Expected: A vector of probabilities for each token in the batch. There are three words, so three probabilities.
+    print(f"Replacement probability Batch 1, Token 1: {replace_probs[0][0]}")        # Expected: Value between 0 and 1
+    print(f"Synonym Probability Distribution for the Batch 1, Token 2: {synonym_probs[0][1]}") # Expected: A vector of probabilities for each word in the dictionary. There are three words, so three probabilities.
+    print(f"Synonym Probabilities Sum-to-1 Constraint for Token 1: {torch.sum(synonym_probs[0][0])}") # Expected : Sum to 1 constraint for the softmax probabilities, for the first token
+
