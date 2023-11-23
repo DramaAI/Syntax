@@ -1,3 +1,4 @@
-syntax/**
+syntax/
 docker-compose.yml
 Dockerfile
+__pycache__/
