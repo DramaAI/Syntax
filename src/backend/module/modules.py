@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+
 import torch.nn.functional as F
 from pydantic import BaseModel
 
@@ -115,36 +116,4 @@ class attn_module(nn.Module):
             pass
         
         return replace_probs, synonym_probs
-
-
-
-if __name__ == '__main__':
-
-    # Unit tests
-    config = attn_config(embed_dim=[512, 512], num_heads=[2, 2], dropout=[0.0, 0.0], 
-                        input_dim=256, dict_dim=3, synonym_head="softmax", replace_head="sigmoid")
-
-    # Input must now be of shape (batch_size, num_tokens, num_features)
-    # Let's assume a batch_size of 10 for this example
-    batch_size = 2
-    num_tokens = 3
-    input_features = 256
-
-    # Generating random input to simulate a batch of sequences
-    input = torch.randn(batch_size, num_tokens, input_features)
-
-    # Instantiate the attention module with the given configuration
-    attn_mech = attn_module(config)
-
-    # Forward pass through the attention mechanism
-    # Note that config is no longer passed as an argument to the forward method
-    replace_probs, synonym_probs = attn_mech(input)
-
-    # Print out shapes and values
-    print(f"Replacement Probabilities Shape: {replace_probs.shape}")  # Expected: (batch_size, num_tokens, 1)
-    print(f"Synonym Probabilities Shape: {synonym_probs.shape}")      # Expected: (batch_size, num_tokens, dict_dim)
-    print(f"Replacement probabilities for each token in Batch 2: {replace_probs[1]}")           # Expected: A vector of probabilities for each token in the batch. There are three words, so three probabilities.
-    print(f"Replacement probability Batch 1, Token 1: {replace_probs[0][0]}")        # Expected: Value between 0 and 1
-    print(f"Synonym Probability Distribution for the Batch 1, Token 2: {synonym_probs[0][1]}") # Expected: A vector of probabilities for each word in the dictionary. There are three words, so three probabilities.
-    print(f"Synonym Probabilities Sum-to-1 Constraint for Token 1: {torch.sum(synonym_probs[0][0])}") # Expected : Sum to 1 constraint for the softmax probabilities, for the first token
 
