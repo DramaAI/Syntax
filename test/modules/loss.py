@@ -6,7 +6,7 @@ import os
 root = pathlib.Path(__file__).parent.parent.parent
 sys.path.append(os.path.join(root))
 
-from src.backend.modules.loss import BinaryCrossEntropy, CrossEntropy
+from src.backend.module.loss import BinaryCrossEntropy, CrossEntropy
 
 import torch
 import torch.nn.functional as F
