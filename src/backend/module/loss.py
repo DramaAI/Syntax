@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class BinaryCrossEntropy(nn.Module):
-    r"""
+    """
     BinaryCrossEntropy:
     A class to calculate the binary cross-entropy loss between predicted and target tensors.
 
@@ -13,7 +13,7 @@ class BinaryCrossEntropy(nn.Module):
 
     """
 
-    def __init__(self) -> None:
+    def __init__(self, head_type) -> None:
         """
         Initializes the BinaryCrossEntropy class.
 
@@ -22,8 +22,8 @@ class BinaryCrossEntropy(nn.Module):
         **kwargs: Arbitrary keyword arguments
         
         """
-        super().__init__()
-        self.bce = F.binary_cross_entropy  # Assigns the binary cross-entropy function
+        super(BinaryCrossEntropy).__init__()
+        self.bce = nn.BCEWithLogitsLoss if head_type == "linear" else nn.BCELoss  # Assigns the binary cross-entropy function
 
     def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         """
@@ -45,7 +45,7 @@ class CrossEntropy(nn.Module):
     A class to compute the categorical (multi-class) cross-entropy loss.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, head_type) -> None:
         """
         Initializes the CrossEntropy class.
 
@@ -53,8 +53,8 @@ class CrossEntropy(nn.Module):
         *args: Variable length argument list
         **kwargs: Arbitrary keyword arguments
         """
-        super().__init__()
-        self.ce = F.cross_entropy  # Assigns the categorical cross-entropy function
+        super(CrossEntropy).__init__()
+        self.ce = nn.CrossEntropyLoss if head_type == "linear" else F.cross_entropy  # Assigns the categorical cross-entropy function
 
     def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         """
