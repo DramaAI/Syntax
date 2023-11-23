@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import copy
 import json
 import os
+import pathlib
 
 import torch
 from torch import Tensor
@@ -13,16 +14,19 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-PRETRAINED_MODEL_ARCHIVE_MAP = {
-    'syntax-base-bert': "[location of weights...]",
-}
+
 BERT_CONFIG_NAME = 'bert_config.json'
-PT_WEIGHTS_PATH = './weights/model/syntax-bert-base.pt'
+
+
+FILEPATH = os.path.dirname(os.path.realpath(__file__))
+PARENT_DIR = pathlib.Path(os.path.dirname(os.path.realpath(__file__))).parent
+
+PT_WEIGHTS_PATH = os.path.join(PARENT_DIR, 'data', 'weights', 'bert-base-uncased.pt')
 
 
 @dataclass
 class BertConfig:
-    vocab_size: int = 28996 # GPT-2 vocab_size of 50257, padded up to nearest multiple of 64 for efficiency
+    vocab_size: int = 30522
     max_positional_embeddings=512
     layer_norm_eps=1e-12
     type_vocab_size=2
@@ -30,7 +34,7 @@ class BertConfig:
     n_layer: int= 12
     n_heads: int=12
     dropout: float = 0.1
-    bias: bool = True # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
+    bias: bool = True 
 
 
     @classmethod
@@ -165,8 +169,8 @@ class SyntaxBertAttention(nn.Module):
         self.self = SyntaxBertSelfAttention(config)
         self.output = SyntaxSelfOutput(config)
     
-    def forward(self, input : Tensor, mask : Tensor):
-        output = self.self(input, mask)
+    def forward(self, input : Tensor, attention_mask : Tensor):
+        output = self.self(input, attention_mask)
         return self.output(output, input)
 
 
@@ -203,8 +207,8 @@ class SyntaxBertLayer(nn.Module):
         self.intermediate = SyntaxBertIntermediate(config)
         self.output = SyntaxBertOutput(config)
 
-    def forward(self, hidden_state  : Tensor, mask : Tensor):
-        attention_output = self.attention(hidden_state, mask)
+    def forward(self, hidden_state  : Tensor, attention_mask : Tensor):
+        attention_output = self.attention(hidden_state, attention_mask)
         intermediate_output = self.intermediate(attention_output)
         return self.output(intermediate_output, attention_output)
     
@@ -218,10 +222,10 @@ class SyntaxBertEncoder(nn.Module):
             SyntaxBertLayer(config) for _ in range(config.n_layer)
         ])
     
-    def forward(self, hidden_states, mask, output_all_encoded_layer=True):
+    def forward(self, hidden_states, attention_mask, output_all_encoded_layer=True):
         all_encoder_layers = [0] *  (len(self.layer) if output_all_encoded_layer else 1)
         for i, layer_module in enumerate(self.layer):
-            hidden_states = layer_module(hidden_states, mask)
+            hidden_states = layer_module(hidden_states, attention_mask)
             if output_all_encoded_layer:
                 all_encoder_layers[i] = hidden_states
         if not output_all_encoded_layer:
@@ -294,6 +298,20 @@ class SyntaxBertModel(nn.Module):
         
         return encoded_layers 
 
+class SyntaxBertPooler(nn.Module):
+    def __init__(self, config):
+        super(SyntaxBertPooler, self).__init__()
+        self.dense = nn.Linear(config.hidden_size, config.hidden_size)
+        self.activation = nn.Tanh()
+
+    def forward(self, hidden_states):
+        # We "pool" the model by simply taking the hidden state corresponding
+        # to the first token.
+        first_token_tensor = hidden_states[:, 0]
+        pooled_output = self.dense(first_token_tensor)
+        pooled_output = self.activation(pooled_output)
+        return pooled_output
+
 class SyntaxBert(nn.Module):
 
     def __init__(self, config : BertConfig) -> None:
@@ -303,17 +321,23 @@ class SyntaxBert(nn.Module):
         self.cls = SyntaxOnlyMLMHead(config)
 
     @classmethod
-    def load_local_weights(cls, config : BertConfig, filepath : str):
-        assert os.path.isfile(filepath), f'File Path Error: {filepath} is not a path to a pt file'
-        try:
-            logger.info("loading pytorch file (pt) from filepath...")
-            temp = torch.load(filepath)
+    def load_local_weights(cls, config : BertConfig, filepath : str=None):
+        if filepath is not None:
+            assert os.path.isfile(filepath), f'File Path Error: {filepath} is not a path to a pt file'
+            try:
+                logger.info("loading pytorch file (pt) from filepath...")
+                temp = torch.load(filepath)
+                model = cls(config)
+                model.load_state_dict(temp.state_dict())
+                logger.info("loaded weights local weights onto model...")
+            except Exception as e:
+                logger.warn("Something went wrong when loading weights onto the syntax-bert...")
+                raise e
+        else:
+            temp = torch.load(PT_WEIGHTS_PATH)
             model = cls(config)
             model.load_state_dict(temp.state_dict())
             logger.info("loaded weights local weights onto model...")
-        except Exception as e:
-            logger.warn("Something went wrong when loading weights onto the syntax-bert...")
-            raise e
 
         return model
     
@@ -330,8 +354,8 @@ class SyntaxBert(nn.Module):
         
         print(f"{prams // 1_000_000} Million")    
 
-    def forward(self, inputs_ids : Tensor, token_type_ids=None, mask=None):
-        sequence_output = self.bert(inputs_ids, token_type_ids, mask, output_all_encoded_layers=False)
+    def forward(self, inputs_ids : Tensor, token_type_ids=None, attention_mask=None):
+        sequence_output = self.bert(inputs_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
         pred = self.cls(sequence_output)
         return pred
     
