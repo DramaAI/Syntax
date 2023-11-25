@@ -346,7 +346,7 @@ class SyntaxBert(nn.Module):
 
         prams = 0
         for name, param in self.named_parameters():
-            if not include_embedding  and"embedding" in name:
+            if not include_embedding  and "embedding" in name:
                  continue
             else:
                 prams += param.numel()
@@ -354,8 +354,19 @@ class SyntaxBert(nn.Module):
         
         print(f"{prams // 1_000_000} Million")    
 
-    def forward(self, inputs_ids : Tensor, token_type_ids=None, attention_mask=None):
-        sequence_output = self.bert(inputs_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
-        pred = self.cls(sequence_output)
-        return pred
+    def forward(self, input_ids : Tensor, token_type_ids=None, attention_mask=None):
+        
+        if isinstance(input_ids, list):
+            input_ids = torch.tensor(input_ids)
+        if isinstance(token_type_ids, list):
+            token_type_ids = torch.tensor(token_type_ids)
+        if isinstance(attention_mask, list):
+            attention_mask = torch.tensor(attention_mask)
+        
+        sequence_output = self.bert(input_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
+        
+        # TODO: remove later and replace with another pretrained model...
+        # pred = self.cls(sequence_output)
+        
+        return None, sequence_output
     
