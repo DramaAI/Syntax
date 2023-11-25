@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from typing import Self
+
 class BinaryCrossEntropy(nn.Module):
     """
     BinaryCrossEntropy:
@@ -13,7 +15,7 @@ class BinaryCrossEntropy(nn.Module):
 
     """
 
-    def __init__(self, head_type) -> None:
+    def __init__(self : Self, head_type) -> None:
         """
         Initializes the BinaryCrossEntropy class.
 
@@ -22,10 +24,10 @@ class BinaryCrossEntropy(nn.Module):
         **kwargs: Arbitrary keyword arguments
         
         """
-        super(BinaryCrossEntropy).__init__()
-        self.bce = nn.BCEWithLogitsLoss if head_type == "linear" else nn.BCELoss  # Assigns the binary cross-entropy function
+        super(BinaryCrossEntropy, self).__init__()
+        self.bce = nn.BCEWithLogitsLoss(reduction="mean") if head_type == "linear" else nn.BCELoss(reduction="mean")  # Assigns the binary cross-entropy function
 
-    def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(self : Self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         """
         Calculates the binary cross-entropy loss.
 
@@ -36,7 +38,7 @@ class BinaryCrossEntropy(nn.Module):
         Returns:
         torch.Tensor: Binary cross-entropy loss
         """
-        return self.bce(pred, target, reduction="mean")  # Computes binary cross-entropy loss
+        return self.bce(pred, target)  # Computes binary cross-entropy loss
 
 
 class CrossEntropy(nn.Module):
@@ -45,7 +47,7 @@ class CrossEntropy(nn.Module):
     A class to compute the categorical (multi-class) cross-entropy loss.
     """
 
-    def __init__(self, head_type) -> None:
+    def __init__(self : Self, head_type) -> None:
         """
         Initializes the CrossEntropy class.
 
@@ -53,21 +55,21 @@ class CrossEntropy(nn.Module):
         *args: Variable length argument list
         **kwargs: Arbitrary keyword arguments
         """
-        super(CrossEntropy).__init__()
-        self.ce = nn.CrossEntropyLoss if head_type == "linear" else F.cross_entropy  # Assigns the categorical cross-entropy function
+        super(CrossEntropy, self).__init__()
+        self.ce = nn.CrossEntropyLoss(reduction="mean") if head_type == "linear" else F.cross_entropy(reduction="mean")  # Assigns the categorical cross-entropy function
 
-    def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(self : Self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         """
         Computes the categorical cross-entropy loss.
 
         Parameters:
-        pred (torch.Tensor): Predicted tensor
+        pred (torch.Tensor): Predicted tensor 
         target (torch.Tensor): Target tensor
 
         Returns:
         torch.Tensor: Categorical cross-entropy loss
         """
-        return self.ce(pred, target, reduction="mean")  # Computes categorical cross-entropy loss
+        return self.ce(pred, target)  # Computes categorical cross-entropy loss
 
 
 class JointCrossEntropy(nn.Module):
@@ -76,7 +78,7 @@ class JointCrossEntropy(nn.Module):
     A class that combines binary and categorical cross-entropy losses.
     """
 
-    def __init__(self) -> None:
+    def __init__(self : Self, head_type : str) -> None:
         """
         Initializes the JointCrossEntropy class.
 
@@ -85,22 +87,27 @@ class JointCrossEntropy(nn.Module):
         **kwargs: Arbitrary keyword arguments
         """
         super().__init__()
-        self.bce = BinaryCrossEntropy()  # Creates an instance of BinaryCrossEntropy
-        self.ce = CrossEntropy()  # Creates an instance of CrossEntropy
+        self.bce = BinaryCrossEntropy(head_type=head_type)  # Creates an instance of BinaryCrossEntropy
+        self.ce = CrossEntropy(head_type=head_type)  # Creates an instance of CrossEntropy
 
-    def forward(self, replacement: torch.Tensor, synonym: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(self              : Self, 
+                synonym           : torch.Tensor,  
+                replacement       : torch.Tensor, 
+                synonym_targets   : torch.Tensor, 
+                replacement_target: torch.Tensor) -> torch.Tensor:
         """
         Combines binary and categorical cross-entropy losses and returns their sum.
 
         Parameters:
         replacement (torch.Tensor): Tensor of replacement probability [0, 1]
         synonym (torch.Tensor): Tensor for synonym of each s_i a probability distribution 
-        target (torch.Tensor): Binary tensor, 1 denoting changed, and 0 not changed within labeled set
+        synonym_target (torch.Tensor): Binary tensor, 1 denoting changed, and 0 not changed within labeled set
+        replacement_target (torch.Tensor): Tensor for synonym of each y_i being a vector of vocab size of the one-hot encoded vector.
 
         Returns:
         torch.Tensor: Sum of binary and categorical cross-entropy losses
         """
-        L_1 = self.bce(replacement, target)  # Calculates binary cross-entropy loss
-        L_2 = self.ce(synonym, target)  # Calculates categorical cross-entropy loss
+        L_1 = self.bce(replacement, replacement_target)  # Calculates binary cross-entropy loss
+        L_2 = self.ce(synonym, synonym_targets)  # Calculates categorical cross-entropy loss
 
         return L_1 + L_2  # Returns the sum of both losses
