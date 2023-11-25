@@ -1,0 +1,11 @@
+{
+    "vocab_size" : 28996,
+    "max_positional_embeddings":512,
+    "layer_norm_eps" : 1e-12,
+    "type_vocab_size" : 2,
+    "n_embd" : 768,
+    "n_layer" : 12,
+    "n_heads" : 12,
+    "dropout"  : 0.1,
+    "bias" : true
+}
