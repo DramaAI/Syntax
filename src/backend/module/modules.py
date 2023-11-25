@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-
 import torch.nn.functional as F
 from pydantic import BaseModel
 
@@ -16,7 +15,7 @@ class attn_config(BaseModel):
         dict_dim: The dimension of the dictionary.
         synonym_head: The type of head to use for the synonym probabilities. Can be either "linear" or "softmax".
     """
-    embed_dim: list = [None, None]
+    embed_dim: int = None
     num_heads: list = [None, None]
     dropout: list = [None, None]
     input_dim: int
@@ -52,21 +51,21 @@ class attn_module(nn.Module):
         super(attn_module, self).__init__()
         
         # Fully connected layers
-        self.q1 = nn.Linear(config.input_dim, config.embed_dim[0])
-        self.v1 = nn.Linear(config.input_dim, config.embed_dim[0])
-        self.k1 = nn.Linear(config.input_dim, config.embed_dim[0])
-        self.q2 = nn.Linear(config.input_dim, config.embed_dim[1])
-        self.v2 = nn.Linear(config.input_dim, config.embed_dim[1])
-        self.k2 = nn.Linear(config.input_dim, config.embed_dim[1])
+        self.q1 = nn.Linear(config.input_dim, config.embed_dim)
+        self.v1 = nn.Linear(config.input_dim, config.embed_dim)
+        self.k1 = nn.Linear(config.input_dim, config.embed_dim)
+        self.q2 = nn.Linear(config.input_dim, config.embed_dim)
+        self.v2 = nn.Linear(config.input_dim, config.embed_dim)
+        self.k2 = nn.Linear(config.input_dim, config.embed_dim)
         
-        self.proj1 = nn.Linear(config.embed_dim[1], config.embed_dim[0])
-        self.proj2 = nn.Linear(config.embed_dim[0], 1)
-        self.proj3 = nn.Linear(config.embed_dim[1], config.dict_dim)
+        self.proj1 = nn.Linear(config.embed_dim, config.embed_dim)
+        self.proj2 = nn.Linear(config.embed_dim, 1)
+        self.proj3 = nn.Linear(config.embed_dim, config.dict_dim)
         
         # Attention layers with batch_first=True
-        self.attn1 = nn.MultiheadAttention(config.embed_dim[0], config.num_heads[0], 
+        self.attn1 = nn.MultiheadAttention(config.embed_dim, config.num_heads[0], 
                                            dropout=config.dropout[0], batch_first=True)
-        self.attn2 = nn.MultiheadAttention(config.embed_dim[1], config.num_heads[1], 
+        self.attn2 = nn.MultiheadAttention(config.embed_dim, config.num_heads[1], 
                                            dropout=config.dropout[1], batch_first=True)
         
         self.synonym_head = config.synonym_head
