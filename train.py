@@ -37,7 +37,7 @@ if __name__ == "__main__":
         load_base_model()
 
 
-
+    print("[INFO] Initialization Bert model")
     model = nn.SyntaxBert.load_local_weights(nn.BertConfig)
     tokenizer = load_tokenizer()
  
@@ -54,13 +54,12 @@ if __name__ == "__main__":
                                 synonym_head="softmax", 
                                 replace_head="sigmoid")    
 
-
+    print("[INFO] Initialization Head")
     head = modules.attn_module(config=config)
     if args.checkpoint is not None:
         head.load_state_dict(torch.load(args.checkpoint))
 
-    inputs, _, replacement, synonyms = preprocessed(df, tokenizer)
-
+    print(f"[INFO] Training Initialization | epoch: {args.epochs:^10} | batch: {args.batch_size:^10} | learning rate: {args.learning_rate:^10} |")
     losses = training(
         model=model,
         head=head,
@@ -74,3 +73,5 @@ if __name__ == "__main__":
         flag=args.flag
     )
 
+
+    print(f'{" END PROGRAM ":#^100}')
