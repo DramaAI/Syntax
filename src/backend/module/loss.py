@@ -15,7 +15,7 @@ class BinaryCrossEntropy(nn.Module):
 
     """
 
-    def __init__(self : Self, head_type) -> None:
+    def __init__(self , head_type) -> None:
         """
         Initializes the BinaryCrossEntropy class.
 
@@ -27,7 +27,7 @@ class BinaryCrossEntropy(nn.Module):
         super(BinaryCrossEntropy, self).__init__()
         self.bce = nn.BCEWithLogitsLoss(reduction="mean") if head_type == "linear" else nn.BCELoss(reduction="mean")  # Assigns the binary cross-entropy function
 
-    def forward(self : Self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(self , pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         """
         Calculates the binary cross-entropy loss.
 
@@ -47,7 +47,7 @@ class CrossEntropy(nn.Module):
     A class to compute the categorical (multi-class) cross-entropy loss.
     """
 
-    def __init__(self : Self, head_type) -> None:
+    def __init__(self , head_type) -> None:
         """
         Initializes the CrossEntropy class.
 
@@ -58,7 +58,7 @@ class CrossEntropy(nn.Module):
         super(CrossEntropy, self).__init__()
         self.ce = nn.CrossEntropyLoss(reduction="mean") if head_type == "linear" else F.cross_entropy(reduction="mean")  # Assigns the categorical cross-entropy function
 
-    def forward(self : Self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(self , pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         """
         Computes the categorical cross-entropy loss.
 
@@ -78,7 +78,7 @@ class JointCrossEntropy(nn.Module):
     A class that combines binary and categorical cross-entropy losses.
     """
 
-    def __init__(self : Self, head_type : str) -> None:
+    def __init__(self , head_type : str) -> None:
         """
         Initializes the JointCrossEntropy class.
 
@@ -90,7 +90,7 @@ class JointCrossEntropy(nn.Module):
         self.bce = BinaryCrossEntropy(head_type=head_type)  # Creates an instance of BinaryCrossEntropy
         self.ce = CrossEntropy(head_type=head_type)  # Creates an instance of CrossEntropy
 
-    def forward(self              : Self, 
+    def forward(self              , 
                 synonym           : torch.Tensor,  
                 replacement       : torch.Tensor, 
                 synonym_targets   : torch.Tensor, 
