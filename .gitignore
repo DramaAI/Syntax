@@ -2,5 +2,5 @@ syntax/
 docker-compose.yml
 Dockerfile
 __pycache__/
-src/backend/data/tokenizer
-src/backend/data/weights
+src/backend/data/tokenizer/tokenizer.pt
+src/backend/data/weights/bert-base-uncased.pt
