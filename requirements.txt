@@ -104,3 +104,4 @@ wandb==0.15.12
 websockets==11.0.3
 yarl==1.9.2
 zipp==3.17.0
+pyarrow==14.0.1
