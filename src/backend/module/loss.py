@@ -2,8 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from typing import Self
-
 class BinaryCrossEntropy(nn.Module):
     """
     BinaryCrossEntropy:
