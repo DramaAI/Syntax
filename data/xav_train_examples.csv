@@ -1,0 +1,38 @@
+ID,Input,Output
+1,"The cat was really big. It was very ~_~big and black in color.",large
+2,"The dog was really small. It was very ~_~small and white in color.",tiny
+3,"The bear was really big. It was very ~_~big and had brown fur.",large
+4,"The tiger was extremely large. It was quite ~_~large and black in color.",big
+5,"The lion cub was very small. It was quite ~_~small and had light brown fur.",tiny
+6,"The elephant was really big. It was very ~_~big and had grey skin.",large
+7,"The car was really shiny. It was very ~_~shiny and had a red color.",bright
+8,"The truck was really muddy. It was very ~_~muddy and had a brown color.",dirty
+9,"The house was super clean. It was ~_~clean and had a white color with four flours.",tidy
+10,"The room was extremely dirty. It was very ~_~dirty and with clothing and debris scattered everywhere.",messy
+11,"Therefore, it suffices to say that we had a problem. ~_~Therefore, an immediate solution was needed.",hence
+12,"There were many people in the room, and ~_~many people required medical aid.",multiple
+13,"Sometimes, I love to go for a dip in the ocean. When, I'm visiting California, ~_~sometimes I like to go for ice cream.", occasionally
+14,"I love to go for a walk in the park in October. I ~_~love the feeling of the fall breeze.",enjoy
+15,"I love to go for a walk in the park in January or February. I ~_~love the sight of fresh snowfall.",enjoy
+16,"I love to go for a walk in the park in June or July. I ~_~love the sight of the flowers in bloom.",enjoy
+17,"My cat's name was Whiskers, and ~_~Whiskers is always sleeping or eating. Whiskers is a lazy cat.",he
+18,"My dog's name was Julia, and ~_~Julia is always sleeping or eating. Julia is a lazy dog.",she
+19,"The lecture on ancient civilizations started off on the exciting topic of ancient Egypt, drawing in the audience. However, as the speaker delved deeper into the history, his descriptions became redundant, repeatedly emphasizing the significance of certain archaeological discoveries. This ~_~redundancy, somewhat diluted the overall impact of the talk. Nevertheless, the lecture concluded effectively, leaving the audience with much to ponder about the past.",repetition
+20,"The basketball game was very exciting. The crowd was very ~_~loud and enthusiastic. The players were focused and ~_~very determined. They dribbled the ball with skill and shot with precision. The score remained close throughout, adding to the game's intensity. The spectators were deeply engaged, eagerly anticipating the outcome. Ultimately, the team's victory felt both satisfying and rewarding.","extremely,highly"
+21,"The lecture on ancient civilizations started off on the exciting topic of ancient Egypt, drawing in the audience. However, as the speaker delved deeper into the history, his descriptions became more and more confusing. This ~_~confusion, somewhat distracted the overall impact of the talk. Nevertheless, the lecture concluded effectively, leaving the audience with much to ponder about the past.",distraction
+22,"The chimpazees eyes shined bright with excitement. He saw a ~_~bright future ahead of him in the circus.",glowing
+23,"The chimpazees eyes dimmed with disappointment. He was ~_~disappointed that the rest of his life would be restricted to the circus.",said
+24,"Again, a snake appeared in the garden for the second time, it scared my ~_~kids! If another snake appears again and I'm moving out of this house with my kids, it's too much.",children
+25,"Belknap Crater is best hiked on a cooler day. The trail is very exposed, and the lava flow section would be even less pleasant or even dangerous on a hot day. We set out at dawn, the sky looked beautiful and I was ready for the hike. Once ~_~dawn hit, the sun was blazing hot and I was sweating like crazy.",daybreak
+26,"The dinner at Cavier's was the best. They make the ~_~best cod fillet.",finest
+27,"The dinner at Cavier's was bad. They make a ~_~bad cod fillet.",horrible
+27,"The lunch at Cavier's house was terrific. They make a ~_~terrific BBQ pork.",great
+28,"Angeline Quinto (born November 26, 1989) is a Filipino singer, actress, and television personality. ~_~Angeline is known for her vocal range and soulful singing style, and has garnered critical praise for her lyrical content and themes of love, heartbreak, and empowerment. Angeline has been featured in the soundtracks of films and television series in the Philippines.",she
+29,"Basically, we went out for a date but I was ~_~basically just there for the food.",really
+30,"Totally, we went out for a date but I was ~_~totally just there for the food.",really
+31,"Essentially, we went out for a date but I was ~_~essentially just there for the food.",really
+32,"It would be nice to have a day at the beach. It would be be ~_~nice to have a swim in the ocean and relax on the sand.",great
+33,"We really needed more hands on deck in the lab, research was ~_~really behind schedule, and we really needed to kick things in to high gear. We also needed ~_~more lab equipment as well, things are falling apart.","extremely,additional"
+34,"It's important that we get this project done on time. It's ~_~important that we pay attention to the quality of our work as well, and we need to make sure that we have enough people to get it done.",vital
+35,"~_~First, I started off at the Population Neuroscience & Developmental Neuroimaging Program at the Universtiy of Toronto. It was my first research experience, which led to several opportunities after that.",Initially
+36,"My work focuses on the development of the brain and how it relates to mental health, and started a project at the University of Alabama. ~_~My project examines the effects of androgen receptor expression and major depressive disorder",The
