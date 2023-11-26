@@ -2,7 +2,7 @@ import unittest
 
 
 from modules.loss import TestLossModules
-from modules.gpt import TestGPTModules
+from test.modules.bert import TestGPTModules
 
 
 if __name__ == "__main__":
