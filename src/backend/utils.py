@@ -46,7 +46,7 @@ def preprocessed(df, tokenizer, vocab=30522, context_length=512, flag="~_~"):
     assert ASSERTION_DATAFRAME_COLUMN(df.columns)
 
     # parse string to convert into a list
-    df["Output"] = df["Output"].apply(lambda x : x.split(','))
+    df["Output"] = df["Output"].apply(lambda x : x.split(',') if isinstance(x, str) else x)
 
     # regular expression that obtains flag and associated word
     pattern = rf"{flag}(\w+)"
@@ -55,7 +55,7 @@ def preprocessed(df, tokenizer, vocab=30522, context_length=512, flag="~_~"):
     if "ID" in df.columns:
         df.drop("ID", axis=1, inplace=True)
 
-    inputs, outputs = [], []
+    inputs, outputs, masks = [], [], []
     for i, sentence in enumerate(df["Input"]):
         replace = re.findall(pattern, sentence) # find all replaced tokens
         replacement : list = df["Output"][i]    # index the associated replacement list
@@ -66,22 +66,27 @@ def preprocessed(df, tokenizer, vocab=30522, context_length=512, flag="~_~"):
 
         # construct the replacement dictionary
         replacement_dict = {replace : replacement[i] for i, replace in enumerate(replace)}   
+        mask_replacement_dict = {replace : tokenizer.mask_token for i, replace in enumerate(replace)}   
 
         # TODO Not ideal in initializing each iteration 
         def replaced(match):
             word = match.group(1)
             return replacement_dict.get(word, match.group(0))
-
+        
         output_text = re.sub(pattern, replaced, sentence)
+        mask_text = re.sub(pattern, lambda x :  mask_replacement_dict.get(x.group(1), x.group(0)), sentence)
         input_text = sentence.replace(flag, "")
+        
         inputs.append(input_text)
         outputs.append(output_text)
+        masks.append(mask_text)
 
 
-    input_tokens = tokenizer(inputs, padding=True, max_length=context_length, truncation=True, return_tensors="pt")
-    # TODO: change to make 
-    output_tokens = tokenizer(outputs, padding=True, max_length=context_length, truncation=True, return_tensors="pt")
-    mask = ((input_tokens["input_ids"] - output_tokens["input_ids"]) != 0).to(torch.long)
+
+    input_tokens = tokenizer(inputs, padding=True, max_length=context_length, truncation=True, return_tensors="pt", return_token_type_ids=False)
+    output_tokens = tokenizer(outputs, padding=True, max_length=context_length, truncation=True, return_tensors="pt", return_token_type_ids=False)
+    masked_tokens = tokenizer(masks, padding=True, max_length=context_length, truncation=True, return_tensors="pt", return_token_type_ids=False, return_attention_mask=False)
+    masked_tokens = (masked_tokens["input_ids"] == tokenizer.mask_token_id)
     prob = torch.nn.functional.one_hot(output_tokens["input_ids"], num_classes=vocab)
     
-    return input_tokens, output_tokens, mask, prob
+    return input_tokens, output_tokens, masked_tokens, prob
