@@ -64,7 +64,6 @@ def training(model        : nn.SyntaxBert,
              **kwarg):
 
     X_train, y_train_replacement, y_train_synonyms = train
-    assert ["input_ids", "attention_mask"] in X_train.key() 
     
     # pre-train process =========================================
     flag = ( 10 
@@ -114,6 +113,12 @@ def training(model        : nn.SyntaxBert,
             # Compute the loss and its gradients
             optimizer.zero_grad()
             loss = loss_fn(logits_s.to(device), logits_r.to(device), syn_y, rep_y)
+            
+            if torch.isnan(loss).any():
+              print("[WARNING] nan loss was found when training, ignoring loss, update and continuing")
+              continue
+
+
             loss.backward()
             optimizer.step()
             losses.append(loss.item())
@@ -124,7 +129,7 @@ def training(model        : nn.SyntaxBert,
         # ...
 
         if i % flag == 0:
-            print(f"[INFO] |{f'model: {model_name:^5}':^20}|{f'epoch: {i:^5}':^20}|{f'avg loss: {loss.item():^5.4f}':^20}|")
+            print(f"[INFO] |{f'model: {model_name:^5}':^20}|{f'epoch: {i:^5}':^20}|{f'avg loss: {avg_loss[i]:^5.4f}':^20}|")
     
     if kwarg.get("save", True):
          torch.save(head.state_dict(), LOCAL_HEAD_MODEL)
