@@ -18,7 +18,7 @@ def evaluation( model        : nn.SyntaxBert,
                 threshold    : float=0.6):
     
     X_test = test
-    total_dataset = len(X)
+    total_dataset = len(test)
     device = (
                 "cuda"
                 if torch.cuda.is_available()
@@ -56,14 +56,15 @@ def evaluation( model        : nn.SyntaxBert,
                
 def training(model        : nn.SyntaxBert, 
              head         : modules.attn_module,
-             train        : tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+             train        : tuple[dict, torch.Tensor, torch.Tensor],
              optimizer    : any,
              loss_fn      : any,
              batch_size   : int=16,
              epoch        : int=2,
              **kwarg):
-    
+
     X_train, y_train_replacement, y_train_synonyms = train
+    assert ["input_ids", "attention_mask"] in X_train.key() 
     
     # pre-train process =========================================
     flag = ( 10 
@@ -95,15 +96,13 @@ def training(model        : nn.SyntaxBert,
     for i in range(epoch):
         losses = []
         for batch in range(0, total_dataset, batch_size):
-        
-            # for each batch zero grad 
-            optimizer.zero_grad()
 
-            # index input
-            x = X[batch:batch+batch_size, ...].to(device)
-                
+            # batched input
+            input_ids = X_train["input_ids"][batch:batch+batch_size, ...].to(device)
+            attn_mask = X_train["attention_mask"][batch:batch+batch_size, ...].to(device)
+            
             # forward pass
-            _, hidden_layer = model(x)
+            _, hidden_layer = model(input_ids=input_ids, attention_mask=attn_mask)
             logits_r, logits_s = head(hidden_layer.to(device))
         
 
@@ -113,14 +112,16 @@ def training(model        : nn.SyntaxBert,
             
 
             # Compute the loss and its gradients
+            optimizer.zero_grad()
             loss = loss_fn(logits_s.to(device), logits_r.to(device), syn_y, rep_y)
             loss.backward()
-
-            # Adjust learning weights
             optimizer.step()
             losses.append(loss.item())
             
         avg_loss.append(sum(losses)/len(losses)) 
+
+        # TODO: add a checkpoint
+        # ...
 
         if i % flag == 0:
             print(f"[INFO] |{f'model: {model_name:^5}':^20}|{f'epoch: {i:^5}':^20}|{f'avg loss: {loss.item():^5.4f}':^20}|")
