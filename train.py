@@ -51,8 +51,8 @@ if __name__ == "__main__":
                                 dropout=[0.1, 0.1], 
                                 input_dim=n_embd, 
                                 dict_dim=dict_dim, 
-                                synonym_head="softmax", 
-                                replace_head="sigmoid")    
+                                synonym_head="linear", 
+                                replace_head="linear")    
 
     print("[INFO] Initialization Head")
     head = modules.attn_module(config=config)
@@ -60,17 +60,16 @@ if __name__ == "__main__":
         head.load_state_dict(torch.load(args.checkpoint))
 
     print(f"[INFO] Training Initialization | epoch: {args.epochs:^10} | batch: {args.batch_size:^10} | learning rate: {args.learning_rate:^10} |")
+
     losses = training(
-        model=model,
-        head=head,
-        X=inputs["input_ids"],
-        replacements=replacement,
-        synonyms=synonyms,
-        optimizer=optimizer,
-        loss_fn=loss_fn,
-        batch_size=args.batch_size,
-        epoch=args.epoch,
-        flag=args.flag
+          model=model,
+          head=head,
+          train=(inputs,replacement,synonyms),
+          optimizer=optimizer,
+          loss_fn=loss_fn,
+          batch_size=args.batch_size,
+          epoch=args.epoch,
+          flag=args.flag
     )
 
 
