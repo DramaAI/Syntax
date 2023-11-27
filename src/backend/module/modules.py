@@ -70,6 +70,20 @@ class attn_module(nn.Module):
         
         self.synonym_head = config.synonym_head
         self.replace_head = config.replace_head
+        
+        self.apply(self._xavier_initialization)
+
+    def _xavier_initialization(self, module):
+        """ author: Andrej karpathy
+            NanoGPT:https://github.com/karpathy/nanoGPT/blob/master/model.py 
+        """
+        if isinstance(module, nn.Linear):
+            nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if module.bias is not None:
+                nn.init.zeros_(module.bias) 
+        elif isinstance(module, nn.Embedding):
+            nn.init.normal_(module.weight, mean=0.0, std=0.02)
+
 
     def forward(self, input):
         """
