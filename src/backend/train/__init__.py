@@ -32,7 +32,7 @@ def evaluation( model        : nn.SyntaxBert,
     model.to(device)
 
     head.replace_head = "sigmoid"
-    head.synonym_head == "softmax"
+    head.synonym_head = "softmax"
 
     with torch.no_grad():
         for batch in range(0, total_dataset, batch_size):
@@ -83,12 +83,6 @@ def training(model        : nn.SyntaxBert,
 
     head.to(device)
     model.to(device)
-
-    # freeze Bert Weights
-    # 
-    for param in model.parameters():
-        param.required_grad = False
-
 
     avg_loss = []
     # train process ============================================
