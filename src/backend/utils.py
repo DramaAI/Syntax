@@ -81,11 +81,9 @@ def preprocessed(df, tokenizer, vocab=30522, context_length=512, flag="~_~"):
         outputs.append(output_text)
         masks.append(mask_text)
 
-
-
-    input_tokens = tokenizer(inputs, padding=True, max_length=context_length, truncation=True, return_tensors="pt", return_token_type_ids=False)
-    output_tokens = tokenizer(outputs, padding=True, max_length=context_length, truncation=True, return_tensors="pt", return_token_type_ids=False)
-    masked_tokens = tokenizer(masks, padding=True, max_length=context_length, truncation=True, return_tensors="pt", return_token_type_ids=False, return_attention_mask=False)
+    input_tokens = tokenizer(inputs, padding='max_length', max_length=context_length, return_tensors="pt", return_token_type_ids=False)
+    output_tokens = tokenizer(outputs, padding='max_length', max_length=context_length, return_tensors="pt", return_token_type_ids=False)
+    masked_tokens = tokenizer(masks, padding='max_length', max_length=context_length, return_tensors="pt", return_token_type_ids=False, return_attention_mask=False)
     masked_tokens = (masked_tokens["input_ids"] == tokenizer.mask_token_id)
     prob = torch.nn.functional.one_hot(output_tokens["input_ids"], num_classes=vocab)
     

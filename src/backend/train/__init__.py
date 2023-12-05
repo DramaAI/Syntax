@@ -38,19 +38,21 @@ def evaluation( model        : nn.SyntaxBert,
         for batch in range(0, total_dataset, batch_size):
             
                 # index input
-                x = X_test[batch:batch+batch_size, ...].to(device)
+                inputs_ids = X_test["input_ids"][batch:batch+batch_size, ...].to(device)
+                attn_mask  = X_test["attention_mask"][batch:batch+batch_size, ...].to(device)
                     
                 # forward pass
-                _, hidden_layer = model(x)
+                _, hidden_layer = model(inputs_ids, attn_mask)
                 logits_r, logits_s = head(hidden_layer.to(device))
 
                 replacement_mask = logits_r > threshold
                 indices = torch.nonzero(replacement_mask)
 
                 new_tokens = logits_s[indices[:, 0], indices[:, 1]].argmax(axis=-1)
-                x[indices[:, 0], indices[:, 1]] = new_tokens
+                inputs_ids[indices[:, 0], indices[:, 1]] = new_tokens
+                X_test["input_ids"][batch:batch+batch_size, ...] = inputs_ids.cpu()
 
-    return X_test     
+    return X_test["input_ids"]
 
                 
                

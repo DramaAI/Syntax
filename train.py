@@ -59,7 +59,8 @@ if __name__ == "__main__":
     if args.checkpoint is not None:
         head.load_state_dict(torch.load(args.checkpoint))
 
-    print(f"[INFO] Training Initialization | epoch: {args.epochs:^10} | batch: {args.batch_size:^10} | learning rate: {args.learning_rate:^10} |")
+    print(f"[INFO] Training Initialization | epochs: {args.epochs:^10} | batch: {args.batch_size:^10} | learning rate: {args.learning_rate:^10} |")
+
 
     losses = training(
           model=model,
@@ -68,7 +69,7 @@ if __name__ == "__main__":
           optimizer=optimizer,
           loss_fn=loss_fn,
           batch_size=args.batch_size,
-          epoch=args.epoch,
+          epoch=args.epochs,
           flag=args.flag
     )
 
