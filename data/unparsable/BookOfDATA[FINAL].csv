@@ -4,7 +4,6 @@ id,Input_text,Output_text,Word_replaced,Word_Replaced_With
 2,"Sprite is a clear, ~_~citrus-flavored beverage created by the Coca-Cola Company.","Sprite is a clear, lemon and lime-flavored soft drink created by the Coca-Cola Company.",citrus-flavored,lemon and lime-flavored
 2,,,beverage,soft drink
 3,Nivea is a ~_~European beauty brand that specializes in ~_~dermal and ~_~physical care.,Nivea is a German personal care brand that specializes in skin and body care.,European,German
-3,,,beauty,personal care
 3,,,dermal,skin
 3,,,physical,body
 4,Nescafe is a brand of ~_~quick coffee made by the Vevey-based company Nestle.,Nescafe is a brand of instant coffee made by the Vevey-based company Nestle.,quick coffee,instant coffee
