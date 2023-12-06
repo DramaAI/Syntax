@@ -370,3 +370,15 @@ class SyntaxBert(nn.Module):
         
         return None, sequence_output
     
+
+class Syntax(nn.Module):
+
+    def __init__(self, head, bert) -> None:
+        super(Syntax, self).__init__()
+        self.bert = bert
+        self.head = head
+    
+    def forward(self, input_ids, attention_mask):
+        _, hidden_layer = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+        logits_r, logits_s = self.head(hidden_layer)
+        return logits_r, logits_s

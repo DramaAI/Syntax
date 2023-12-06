@@ -3,11 +3,11 @@ import os
 import re
 import pandas as pd
 
+__all__ = ["load_base_model", "load_tokenizer", "process_data"]
+
 FILEPATH = os.path.dirname(os.path.realpath(__file__))
 LOCAL_BASE_MODEL = os.path.join(FILEPATH, "data", 'weights', 'bert-base-uncased.pt')
 LOCAL_TOKENIZER  = os.path.join(FILEPATH, "data", 'tokenizer', 'tokenizer.pt')
-
-__all__ = ["load_base_model", "load_tokenizer", "process_data"]
 
 def load_base_model():
     model = None 

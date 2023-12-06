@@ -8,12 +8,10 @@ from src.backend.train import evaluation
 
 import os
 import argparse
-import csv
 
 
 FILEPATH = os.path.dirname(os.path.realpath(__file__))
 LOCAL_BASE_MODEL = os.path.join(FILEPATH, "src", "backend","data", 'weights', 'bert-base-uncased.pt')
-LOCAL_HEAD_MODEL = os.path.join(FILEPATH, "src", "backend","data", 'weights', "head", 'bert-base-attention-head.pt')
 
 if __name__ == "__main__":
 
@@ -61,9 +59,11 @@ if __name__ == "__main__":
                         batch_size=args.batch_size,
                         threshold=args.threshold
                       )
+    
     output = tokenizer.batch_decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)
     pd.DataFrame({
         "ID" : range(len(output)),
         "OUTPUT" : output
     }).to_csv("output.csv", index=False)
+
     print(f'{" END PROGRAM ":#^100}')
